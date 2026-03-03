@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Downloader</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 50px; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1); }
+        input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background-color: #218838; }
+        #status { margin-top: 15px; font-weight: bold; color: #333; }
+        a.download-link { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Video Downloader</h2>
+        <input type="text" id="videoLink" placeholder="Video Link Ekhane Paste Korun">
+        
+        <select id="resolution">
+            <option value="best">Original/Best Quality</option>
+            <option value="1080">1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+        </select>
+        
+        <button onclick="downloadVideo()" id="downloadBtn">Download</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function downloadVideo() {
+            const link = document.getElementById('videoLink').value;
+            const res = document.getElementById('resolution').value;
+            const status = document.getElementById('status');
+            const btn = document.getElementById('downloadBtn');
+
+            if(!link) { status.innerText = "Doyakore ekta link din!"; return; }
+            
+            status.innerText = "Link process hocche... Ektu opekha korun.";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/get-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: link, resolution: res})
+                });
+                const data = await response.json();
+                
+                if(data.success) {
+                    status.innerHTML = `<a href="${data.download_url}" target="_blank" class="download-link">Click Here to Download File</a>`;
+                    window.location.href = data.download_url; // Auto download start korar jonno
+                } else {
+                    status.innerText = "Error: " + data.error;
+                }
+            } catch (e) {
+                status.innerText = "Server er sathe connect kora jacche na.";
+            }
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
